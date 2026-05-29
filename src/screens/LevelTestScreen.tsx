@@ -1,22 +1,26 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { OnboardingQuestion } from '../data/onboardingQuestions';
 import { colors, ui } from '../theme';
 
 type LevelTestScreenProps = {
+  question: OnboardingQuestion;
+  questionNumber: number;
   selected: number | null;
   onSelect: (index: number) => void;
   onSubmit: () => void;
   onBack: () => void;
 };
 
-export function LevelTestScreen({ selected, onSelect, onSubmit, onBack }: LevelTestScreenProps) {
-  const answers = [
-    'Python комбинирует счетчик ссылок и сборщик циклов, а Java/C# полагаются на полноценный GC.',
-    'Java и C# не имеют GC, а Python очищает память только вручную.',
-    'Разницы нет, везде одинаковый механизм очистки памяти.',
-  ];
-
+export function LevelTestScreen({
+  question,
+  questionNumber,
+  selected,
+  onSelect,
+  onSubmit,
+  onBack,
+}: LevelTestScreenProps) {
   return (
-    <View style={ui.scrollPad}>
+    <ScrollView contentContainerStyle={ui.scrollPad} showsVerticalScrollIndicator={false}>
       <View style={styles.screen}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹</Text>
@@ -27,26 +31,29 @@ export function LevelTestScreen({ selected, onSelect, onSubmit, onBack }: LevelT
         <Text style={styles.progressText}>2/3</Text>
         <Text style={styles.title}>Тест для определения уровня</Text>
         <Text style={styles.question}>
-          1. Чем отличается управление памятью в Python (CPython) от Java (JVM) и C# (CLR), особенно когда речь идет
-          о циклических ссылках?
+          {questionNumber}. {question.text}
         </Text>
-        {answers.map((answer, index) => (
-          <Pressable key={answer} style={styles.answerRow} onPress={() => onSelect(index)}>
+        {question.options.map((answer, index) => (
+          <Pressable key={`${questionNumber}-${index}`} style={styles.answerRow} onPress={() => onSelect(index)}>
             <View style={[styles.radio, selected === index && styles.radioSelected]} />
             <Text style={styles.answerText}>{answer}</Text>
           </Pressable>
         ))}
-        <Pressable style={[ui.button, selected === null && styles.disabled]} onPress={onSubmit} disabled={selected === null}>
+        <Pressable
+          style={[ui.button, styles.submitBtn, selected === null && styles.disabled]}
+          onPress={onSubmit}
+          disabled={selected === null}
+        >
           <Text style={ui.buttonText}>Ответить</Text>
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
+    minHeight: 600,
   },
   back: {
     color: '#fff',
@@ -104,8 +111,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  submitBtn: {
+    marginTop: 22,
+  },
   disabled: {
     opacity: 0.55,
-    marginTop: 22,
   },
 });

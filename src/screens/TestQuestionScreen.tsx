@@ -2,31 +2,49 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, ui } from '../theme';
 
 type TestQuestionScreenProps = {
+  testTitle: string;
+  testSubtitle: string;
+  currentStep: number;
+  totalSteps: number;
+  question: string;
+  answers: string[];
   selected: number | null;
   onSelect: (n: number) => void;
   onBack: () => void;
   onSubmit: () => void;
 };
 
-export function TestQuestionScreen({ selected, onSelect, onBack, onSubmit }: TestQuestionScreenProps) {
-  const answers = [
-    'Задача системных администраторов и ручных проверок.',
-    'Автоматизация всех фаз жизненного цикла процессов в компании.',
-    'Интеграция разработки и эксплуатации для ускорения поставки ПО.',
-  ];
-
+export function TestQuestionScreen({
+  testTitle,
+  testSubtitle,
+  currentStep,
+  totalSteps,
+  question,
+  answers,
+  selected,
+  onSelect,
+  onBack,
+  onSubmit,
+}: TestQuestionScreenProps) {
+  const progressWidth = `${Math.round((currentStep / totalSteps) * 100)}%` as const;
   return (
-    <View style={ui.scrollPad}>
+    <View style={styles.page}>
+      <Text style={styles.pageHint}>{testSubtitle ? `${testTitle}, ${testSubtitle}` : testTitle}</Text>
+      <View style={ui.scrollPad}>
       <View style={styles.screen}>
         <Pressable onPress={onBack}>
           <Text style={styles.back}>‹</Text>
         </Pressable>
         <View style={styles.track}>
-          <View style={[styles.fill, { width: '20%' }]} />
+          <View style={[styles.fill, { width: progressWidth }]} />
         </View>
-        <Text style={styles.progress}>1/5</Text>
+        <Text style={styles.progress}>
+          {currentStep}/{totalSteps}
+        </Text>
 
-        <Text style={styles.qText}>1. В чем заключается основная цель методологии DevOps?</Text>
+        <Text style={styles.qText}>
+          {currentStep}. {question}
+        </Text>
         {answers.map((answer, idx) => (
           <Pressable key={answer} style={styles.answerRow} onPress={() => onSelect(idx)}>
             <View style={[styles.radio, selected === idx && styles.radioSelected]} />
@@ -38,13 +56,26 @@ export function TestQuestionScreen({ selected, onSelect, onBack, onSubmit }: Tes
           <Text style={ui.buttonText}>Ответить</Text>
         </Pressable>
       </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+  },
+  pageHint: {
+    color: '#8c8c8c',
+    fontSize: 13,
+    marginLeft: 6,
+    marginBottom: 6,
+  },
   screen: {
     flex: 1,
+    backgroundColor: '#171313',
+    borderRadius: 34,
+    padding: 12,
   },
   back: {
     color: '#fff',
@@ -69,8 +100,8 @@ const styles = StyleSheet.create({
   },
   qText: {
     color: '#d2d2d2',
-    fontSize: 22,
-    lineHeight: 32,
+    fontSize: 30,
+    lineHeight: 36,
     marginVertical: 20,
   },
   answerRow: {
@@ -94,7 +125,8 @@ const styles = StyleSheet.create({
   answerText: {
     flex: 1,
     color: '#d0d0d0',
-    lineHeight: 20,
+    lineHeight: 18,
+    fontSize: 12,
   },
   disabled: {
     opacity: 0.55,

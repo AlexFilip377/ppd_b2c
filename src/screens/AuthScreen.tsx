@@ -1,25 +1,74 @@
 import { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors, ui } from '../theme';
+
+export type AuthFormData = {
+  name: string;
+  city: string;
+  birthDate: string | null;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 type AuthScreenProps = {
   mode: 'register' | 'login';
   onModeChange: (mode: 'register' | 'login') => void;
-  onContinue: () => void;
+  onSubmit: (data: AuthFormData) => void;
+  loading?: boolean;
+  error?: string | null;
 };
 
-export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) {
+export function AuthScreen({ mode, onModeChange, onSubmit, loading = false, error = null }: AuthScreenProps) {
   const isRegister = mode === 'register';
+  const [name, setName] = useState('');
+  const [city, setCity] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [birthDate, setBirthDate] = useState<Date | null>(null);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedDay, setSelectedDay] = useState(1);
   const [selectedMonth, setSelectedMonth] = useState(1);
   const [selectedYear, setSelectedYear] = useState(2005);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const years = buildYears();
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
   const daysInCurrentMonth = getDaysInMonth(selectedYear, selectedMonth);
   const days = Array.from({ length: daysInCurrentMonth }, (_, i) => i + 1);
+
+  const displayError = error ?? localError;
+
+  const handleSubmit = () => {
+    setLocalError(null);
+    if (isRegister) {
+      if (!name.trim()) {
+        setLocalError('Укажите фамилию и имя');
+        return;
+      }
+      if (!birthDate) {
+        setLocalError('Выберите дату рождения');
+        return;
+      }
+      if (!city.trim()) {
+        setLocalError('Укажите город');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setLocalError('Пароли не совпадают');
+        return;
+      }
+    }
+    onSubmit({
+      name,
+      city,
+      birthDate: birthDate ? formatDate(birthDate) : null,
+      email,
+      password,
+      confirmPassword,
+    });
+  };
 
   return (
     <>
@@ -36,6 +85,8 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
             </Pressable>
           </View>
 
+          {displayError ? <Text style={styles.errorText}>{displayError}</Text> : null}
+
           {isRegister ? (
             <>
               <TextInput
@@ -45,9 +96,12 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
                 autoCapitalize="words"
                 textContentType="name"
                 returnKeyType="next"
+                value={name}
+                onChangeText={setName}
+                editable={!loading}
               />
 
-              <Pressable style={[ui.input, styles.dateField]} onPress={() => setDatePickerVisible(true)}>
+              <Pressable style={[ui.input, styles.dateField]} onPress={() => setDatePickerVisible(true)} disabled={loading}>
                 <Text style={birthDate ? styles.dateValue : styles.datePlaceholder}>
                   {birthDate ? formatDate(birthDate) : 'Выберите дату рождения'}
                 </Text>
@@ -61,6 +115,9 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
                 autoCapitalize="words"
                 textContentType="addressCity"
                 returnKeyType="next"
+                value={city}
+                onChangeText={setCity}
+                editable={!loading}
               />
               <TextInput
                 style={ui.input}
@@ -71,6 +128,9 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
                 autoCorrect={false}
                 textContentType="emailAddress"
                 returnKeyType="next"
+                value={email}
+                onChangeText={setEmail}
+                editable={!loading}
               />
               <TextInput
                 style={ui.input}
@@ -81,6 +141,9 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
                 autoCorrect={false}
                 textContentType="password"
                 returnKeyType="next"
+                value={password}
+                onChangeText={setPassword}
+                editable={!loading}
               />
               <TextInput
                 style={ui.input}
@@ -91,6 +154,9 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
                 autoCorrect={false}
                 textContentType="password"
                 returnKeyType="done"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                editable={!loading}
               />
             </>
           ) : (
@@ -105,6 +171,9 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
                 autoCorrect={false}
                 textContentType="emailAddress"
                 returnKeyType="next"
+                value={email}
+                onChangeText={setEmail}
+                editable={!loading}
               />
               <TextInput
                 style={ui.input}
@@ -115,24 +184,31 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
                 autoCorrect={false}
                 textContentType="password"
                 returnKeyType="done"
+                value={password}
+                onChangeText={setPassword}
+                editable={!loading}
               />
             </>
           )}
 
           <View style={styles.socialRow}>
-            <Pressable style={styles.socialBtn} onPress={() => {}}>
+            <Pressable style={styles.socialBtn} onPress={() => {}} disabled={loading}>
               <Text style={styles.socialText}>G</Text>
             </Pressable>
-            <Pressable style={styles.socialBtn} onPress={() => {}}>
+            <Pressable style={styles.socialBtn} onPress={() => {}} disabled={loading}>
               <Text style={styles.socialText}>A</Text>
             </Pressable>
-            <Pressable style={styles.socialBtn} onPress={() => {}}>
+            <Pressable style={styles.socialBtn} onPress={() => {}} disabled={loading}>
               <Text style={styles.socialText}>GH</Text>
             </Pressable>
           </View>
 
-          <Pressable style={[ui.button, { marginTop: 18 }]} onPress={onContinue}>
-            <Text style={ui.buttonText}>{isRegister ? 'Зарегистрироваться' : 'Войти'}</Text>
+          <Pressable style={[ui.button, { marginTop: 18 }, loading && styles.disabledBtn]} onPress={handleSubmit} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={ui.buttonText}>{isRegister ? 'Зарегистрироваться' : 'Войти'}</Text>
+            )}
           </Pressable>
         </View>
       </ScrollView>
@@ -142,12 +218,7 @@ export function AuthScreen({ mode, onModeChange, onContinue }: AuthScreenProps) 
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Выберите дату рождения</Text>
             <View style={styles.pickerRow}>
-              <WheelColumn
-                label="День"
-                items={days}
-                selected={selectedDay}
-                onSelect={setSelectedDay}
-              />
+              <WheelColumn label="День" items={days} selected={selectedDay} onSelect={setSelectedDay} />
               <WheelColumn
                 label="Месяц"
                 items={months}
@@ -261,6 +332,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
   },
+  errorText: {
+    color: '#ff8a80',
+    marginBottom: 10,
+    fontSize: 14,
+  },
   startImage: {
     width: '100%',
     height: 200,
@@ -299,6 +375,9 @@ const styles = StyleSheet.create({
     color: '#111',
     fontWeight: '700',
     fontSize: 12,
+  },
+  disabledBtn: {
+    opacity: 0.7,
   },
   modalOverlay: {
     flex: 1,

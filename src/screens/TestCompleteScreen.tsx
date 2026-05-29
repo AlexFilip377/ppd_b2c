@@ -2,18 +2,21 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, ui } from '../theme';
 
 type TestCompleteScreenProps = {
+  percent: number;
   onBackToTests: () => void;
 };
 
-export function TestCompleteScreen({ onBackToTests }: TestCompleteScreenProps) {
+export function TestCompleteScreen({ percent, onBackToTests }: TestCompleteScreenProps) {
   return (
-    <View style={ui.scrollPad}>
+    <View style={styles.page}>
+      <Text style={styles.pageHint}>Завершение теста</Text>
+      <View style={ui.scrollPad}>
       <View style={styles.screen}>
         <Text style={styles.title}>Вы завершили тест!</Text>
         <View style={styles.track}>
-          <View style={[styles.fill, { width: '73%' }]} />
+          <View style={[styles.fill, { width: `${Math.max(0, Math.min(100, percent))}%` }]} />
         </View>
-        <Text style={styles.progress}>73%</Text>
+        <Text style={styles.progress}>{percent}%</Text>
         <Text style={styles.text}>
           Если у вас остались вопросы по пройденной теме, вы можете обратиться к ИИ-боту, который уже
           проанализировал ваш ответ и готов к обсуждению.
@@ -23,13 +26,26 @@ export function TestCompleteScreen({ onBackToTests }: TestCompleteScreenProps) {
           <Text style={ui.buttonText}>Вернуться к тестам</Text>
         </Pressable>
       </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+  },
+  pageHint: {
+    color: '#8c8c8c',
+    fontSize: 13,
+    marginLeft: 6,
+    marginBottom: 6,
+  },
   screen: {
     flex: 1,
+    backgroundColor: '#171313',
+    borderRadius: 34,
+    padding: 12,
   },
   title: {
     color: colors.text,

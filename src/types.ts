@@ -1,5 +1,6 @@
 export type ScreenName =
   | 'auth'
+  | 'specialty'
   | 'levelTest'
   | 'instructions'
   | 'home'

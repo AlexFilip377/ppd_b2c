@@ -7,6 +7,14 @@ type InstructionsScreenProps = {
   onOpenAssistant: () => void;
 };
 
+const nextSteps = [
+  'Изучайте лекции в удобном темпе',
+  'Выполняйте задания, чтобы закрепить знания',
+  'Следите за своим прогрессом',
+  'Собирайте и оформляйте резюме по мере обучения',
+  'Отправляйте резюме на реальные вакансии прямо из приложения',
+];
+
 export function InstructionsScreen({ onContinue, onBack, onOpenAssistant }: InstructionsScreenProps) {
   return (
     <View style={ui.scrollPad}>
@@ -26,8 +34,17 @@ export function InstructionsScreen({ onContinue, onBack, onOpenAssistant }: Inst
         <Text style={styles.progressText}>3/3</Text>
 
         <Text style={styles.title}>Вы готовы начать!</Text>
-        <Text style={styles.text}>Мы подобрали персональный план обучения на основе ваших ответов.</Text>
-        <Text style={styles.text}>Изучайте лекции, видео и задания, после обучения отправьте резюме.</Text>
+        <Text style={styles.text}>
+          Мы подобрали для вас персональный план обучения на основе ваших ответов.
+        </Text>
+
+        <Text style={styles.listHeading}>Что дальше:</Text>
+        {nextSteps.map((item) => (
+          <Text key={item} style={styles.bullet}>
+            • {item}
+          </Text>
+        ))}
+
         <Image source={require('../../assets/images/robot_happy.png')} style={styles.robot} resizeMode="contain" />
         <Pressable style={ui.button} onPress={onContinue}>
           <Text style={ui.buttonText}>Начать</Text>
@@ -74,7 +91,19 @@ const styles = StyleSheet.create({
   text: {
     color: '#d0d0d0',
     lineHeight: 22,
+    marginBottom: 12,
+  },
+  listHeading: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '600',
     marginBottom: 8,
+  },
+  bullet: {
+    color: '#d0d0d0',
+    lineHeight: 22,
+    marginBottom: 4,
+    paddingLeft: 4,
   },
   robot: {
     width: 220,
